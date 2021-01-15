@@ -49,7 +49,6 @@ func echo(w http.ResponseWriter, r *http.Request) {
         panic("Couldn't get body")
     }
     data["body"] = body
-    
 
     // query params
     data["query"] = make(map[string]interface{})
