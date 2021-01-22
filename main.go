@@ -2,10 +2,11 @@ package main
 
 import (
     "os"
-    "fmt"
+    //"fmt"
     "strings"
     "net"
     "net/http"
+    "log"
     "encoding/json"
     "io/ioutil"
     // b64 "encoding/base64"
@@ -19,9 +20,20 @@ func main() {
     }
     port = ":" + string(port)
 
-    fmt.Println("Server is running on " + port)
-    http.HandleFunc("/", echo)
-    http.ListenAndServe(port, nil)
+
+    mux := http.NewServeMux()
+    mux.Handle("/", logging_middleware(http.HandlerFunc(echo)))
+
+    log.Println("Listening on " + port)
+    http.ListenAndServe(port, mux)
+}
+
+func logging_middleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        host, port, _ := net.SplitHostPort(r.Host)
+        log.Printf("[%s] %s -> http://%s:%s%s\n", r.Method, r.RemoteAddr, host, port, r.RequestURI)
+        next.ServeHTTP(w, r)
+    })
 }
 
 func echo(w http.ResponseWriter, r *http.Request) {
