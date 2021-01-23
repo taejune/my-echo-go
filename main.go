@@ -29,9 +29,20 @@ func main() {
 }
 
 func logging_middleware(next http.Handler) http.Handler {
+
     return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
         host, port, _ := net.SplitHostPort(r.Host)
         log.Printf("[%s] %s -> http://%s:%s%s\n", r.Method, r.RemoteAddr, host, port, r.RequestURI)
+
+        if r.Header["Content-Type"][0] == "application/json" {
+            body, err := ioutil.ReadAll(r.Body)
+            if err != nil {
+                panic("Couldn't get body")
+            }
+            log.Println(string(body))
+        }
+
         next.ServeHTTP(w, r)
     })
 }
@@ -72,5 +83,3 @@ func echo(w http.ResponseWriter, r *http.Request) {
     payload, _ := json.Marshal(data)
     w.Write(payload)
 }
-
-
