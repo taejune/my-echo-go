@@ -24,8 +24,13 @@ func main() {
     mux := http.NewServeMux()
     mux.Handle("/", logging_middleware(http.HandlerFunc(echo)))
 
-    log.Println("Listening on " + port)
-    http.ListenAndServe(port, mux)
+    go func() {
+        log.Println("Listening on " + port)
+        http.ListenAndServe(port, mux)
+    }()
+
+    log.Println("Listening on 8081 too")
+    log.Fatal(http.ListenAndServeTLS(":8081","cert.pem","key.pem", mux))
 }
 
 func logging_middleware(next http.Handler) http.Handler {
@@ -35,7 +40,8 @@ func logging_middleware(next http.Handler) http.Handler {
         host, port, _ := net.SplitHostPort(r.Host)
         log.Printf("[%s] %s -> http://%s:%s%s\n", r.Method, r.RemoteAddr, host, port, r.RequestURI)
 
-        if r.Header["Content-Type"][0] == "application/json" {
+
+        if len(r.Header["Content-Type"]) > 0 && r.Header["Content-Type"][0] == "application/json" {
             body, err := ioutil.ReadAll(r.Body)
             if err != nil {
                 panic("Couldn't get body")
