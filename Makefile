@@ -2,9 +2,14 @@
 
 all: dev
 
-dev:
+docker:
 	@echo "Build docker image..."
 	docker build -t azssi/my-echo-go .
+
+
+docker-push: docker
+	@echo "Push docker image..."
+	dokcer push azssi/my-echo-go
 
 cert:
 	@echo "Generate certificate CN: $(CN)"
