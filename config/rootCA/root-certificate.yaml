@@ -1,0 +1,19 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: root-crt
+spec:
+  secretName: root-crt-secret
+  subject:
+    organizations:
+      - tmaxcloud
+    countries:
+      - KR
+  commonName: tmax.io
+  isCA: true
+  dnsNames:
+    - tmaxcloud.com
+  issuerRef:
+    name: selfsigned-issuer
+    kind: Issuer
+    group: cert-manager.io

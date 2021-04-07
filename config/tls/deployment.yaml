@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-echo-go-tls
+  labels:
+    app: my-echo-go-tls
+spec:
+  selector:
+    matchLabels:
+      app: my-echo-go-tls
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: my-echo-go-tls
+    spec:
+      containers:
+        - image: azssi/my-echo-go
+          name: echo-server
+          imagePullPolicy: Always
+          env:
+            - name: CERT_PATH
+              value: "/tmp/tls.crt"
+            - name: PRIVATE_KEY_PATH
+              value: "/tmp/tls.key"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: cert-secret
+              mountPath: /tmp/tls.crt
+              subPath: tls.crt
+            - name: cert-secret
+              mountPath: /tmp/tls.key
+              subPath: tls.key
+      volumes:
+        - name: cert-secret
+          secret:
+            secretName: my-echo-go-tls-secret

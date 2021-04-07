@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  template:
+    spec:
+      containers:
+        - name: hello
+          image: curlimages/curl
+          command: ['sh', '-c', 'curl -v https://my-echo-go:18080/hi && sleep 3600']
+          volumeMounts:
+            - name: intermeidate-cert
+              mountPath: /etc/ssl/certs/tls.crt
+              subPath: tls.crt
+      restartPolicy: OnFailure
+      volumes:
+        - name: intermeidate-cert
+          configMap:
+            name: intermediate-crt-configmap
+#apiVersion: batch/v1
+#kind: Job
+#metadata:
+#  name: hello
+#spec:
+#  template:
+#    spec:
+#      containers:
+#        - name: hello
+#          image: curlimages/curl
+#          command: ['sh', '-c', 'curl -v --cacert /etc/ssl/certs/tls.crt --capath /etc/ssl/certs https://my-echo-go:18080/hi && sleep 3600']
+#          volumeMounts:
+#            - name: intermeidate-cert
+#              mountPath: /etc/ssl/certs/tls.crt
+#              subPath: tls.crt
+#            - name: intermeidate-cert
+#              mountPath:  /etc/ssl/certs/ca.crt
+#              subPath: tls.crt
+#      restartPolicy: OnFailure
+#      volumes:
+#        - name: intermeidate-cert
+#          secret:
+#            secretName: intermediate-crt-secret

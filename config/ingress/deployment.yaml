@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-echo-go
+  labels:
+    app: my-echo-go
+spec:
+  selector:
+    matchLabels:
+      app: my-echo-go
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: my-echo-go
+    spec:
+      containers:
+        - image: azssi/my-echo-go
+          name: echo-server
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
