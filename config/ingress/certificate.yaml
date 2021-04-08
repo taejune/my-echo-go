@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: my-echo-go-ingress-crt
+spec:
+  secretName: my-echo-go-ingress-secret
+  subject:
+    organizations:
+      - iam.azssi
+    countries:
+      - KR
+  commonName: azssi.dev
+  usages:
+    - "server auth"
+  dnsNames:
+    - my-echo-go
+  ipAddresses:
+    - 172.22.11.2
+  issuerRef:
+    name: intermediate-issuer
+    kind: Issuer
+    group: cert-manager.io
