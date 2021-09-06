@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
-  name: intermediate-issuer
+  name: my-echo-go-issuer
 spec:
   ca:
-    secretName: root-crt-secret
+    secretName: root-ca-secret

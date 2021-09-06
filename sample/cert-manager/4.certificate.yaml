@@ -1,7 +1,7 @@
 apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
-  name: my-echo-go-tls-crt
+  name: my-echo-go-cert
 spec:
   secretName: my-echo-go-tls-secret
   subject:
@@ -13,10 +13,10 @@ spec:
   usages:
     - "server auth"
   dnsNames:
-    - my-echo-go-tls
+    - my-echo-go
   ipAddresses:
     - 172.22.11.2
   issuerRef:
-    name: intermediate-issuer
+    name: my-echo-go-issuer
     kind: Issuer
     group: cert-manager.io

@@ -3,7 +3,7 @@ kind: Certificate
 metadata:
   name: root-crt
 spec:
-  secretName: root-crt-secret
+  secretName: root-ca-secret
   subject:
     organizations:
       - tmaxcloud
