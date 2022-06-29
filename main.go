@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"os"
 	//"fmt"
 	"encoding/json"
@@ -46,56 +47,49 @@ func main() {
 func logging_middleware(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 		host, port, _ := net.SplitHostPort(r.Host)
-		log.Printf("[%s] %s -> http://%s:%s%s\n", r.Method, r.RemoteAddr, host, port, r.RequestURI)
+		data := make(map[string]interface{})
 
-		if len(r.Header["Content-Type"]) > 0 && r.Header["Content-Type"][0] == "application/json" {
-			body, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				panic("Couldn't get body")
-			}
-			log.Println(string(body))
+		data["method"] = r.Method
+		data["host"], data["port"], _ = net.SplitHostPort(r.Host)
+		//data["scheme"] = r.URL.Scheme
+		//data["path"] = r.URL.Path
+		//data["content-length"] = r.ContentLength
+		data["headers"] = make(map[string]interface{})
+		headers := data["headers"].(map[string]interface{})
+		for k, v := range r.Header {
+			headers[k] = strings.Join(v, ",")
 		}
 
-		next.ServeHTTP(w, r)
+		// body
+		defer r.Body.Close()
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			panic("Couldn't get body")
+		}
+		data["body"] = body
+
+		// query params
+		//data["query"] = make(map[string]interface{})
+		//q := data["query"].(map[string]interface{})
+		//for k, v := range r.URL.Query() {
+		//	q[k] = v
+		//}
+
+		info, _ := json.MarshalIndent(data, "", " ")
+		ctxWithReqInfo := context.WithValue(r.Context(), "req-info", data)
+		rWithInfo := r.WithContext(ctxWithReqInfo)
+
+		log.Printf("[%s] %s -> http://%s:%s%s\n%v\n", r.Method, r.RemoteAddr, host, port, r.RequestURI, string(info))
+
+		next.ServeHTTP(w, rWithInfo)
 	})
 }
 
 func echo(w http.ResponseWriter, r *http.Request) {
-	data := make(map[string]interface{})
+	info := r.Context().Value("req-info")
 
-	w.Header().Set("Content-Type", "application/json")
-
-	data["method"] = r.Method
-	data["scheme"] = r.URL.Scheme
-	data["host"], data["port"], _ = net.SplitHostPort(r.Host)
-	data["path"] = r.URL.Path
-	data["content-length"] = r.ContentLength
-
-	// headers
-	data["headers"] = make(map[string]interface{})
-	headers := data["headers"].(map[string]interface{})
-	for k, v := range r.Header {
-		headers[k] = strings.Join(v, ",")
-	}
-
-	// body
-	defer r.Body.Close()
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		panic("Couldn't get body")
-	}
-	data["body"] = body
-
-	// query params
-	data["query"] = make(map[string]interface{})
-	q := data["query"].(map[string]interface{})
-	for k, v := range r.URL.Query() {
-		q[k] = v
-	}
-
-	payload, _ := json.Marshal(data)
+	payload, _ := json.MarshalIndent(info, "", " ")
 	w.WriteHeader(http.StatusOK)
 	if _, err := w.Write(payload); err != nil {
 		log.Println("failed to response with" + err.Error())
