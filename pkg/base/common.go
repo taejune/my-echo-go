@@ -16,6 +16,12 @@ type PayloadPrintOpt struct {
 
 var Option PayloadPrintOpt
 
+const (
+	FormatJson    = "json"
+	FormatText    = "text"
+	DefaultMaxLen = 1000
+)
+
 func InitByEnv() {
 	switch strings.ToLower(os.Getenv("include_payload")) {
 	case "true":
@@ -29,7 +35,7 @@ func InitByEnv() {
 	var err error
 	Option.Size, err = strconv.ParseInt(os.Getenv("max_payload_len"), 10, 64)
 	if err != nil {
-		Option.Size = 1000
+		Option.Size = DefaultMaxLen
 	}
 
 	switch strings.ToLower(os.Getenv("pretty")) {

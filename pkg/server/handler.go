@@ -8,22 +8,31 @@ import (
 	"strings"
 )
 
-func Echo(w http.ResponseWriter, r *http.Request) {
-	msg := parseHttpRequest(r)
+const (
+	MaxSize = 1024 * 1024 * 5 / 4
+)
 
+func Echo(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
+
+	msg := parseHttpRequest(r)
 
 	if base.Option.Payload {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			log.Println("failed to read body")
 		}
-		msg["Payload"] = string(body)
+
+		var contents []byte
+		if r.Header.Get("Content-Type") == "application/json" || r.Header.Get("Content-Type") == "application/x-ndjson" {
+			contents, _ = base.MarshalJson(string(body), base.Option.Size, base.Option.Pretty)
+		}
+		msg["Payload"] = string(contents)
 	} else {
 		msg["Payload"] = ""
 	}
 
-	out, err := base.MarshalJson(msg, base.Option.Size, false)
+	out, err := base.MarshalJson(msg, MaxSize, false)
 	if err != nil {
 		log.Println("failed to marshal json")
 	}
