@@ -12,4 +12,5 @@ docker-push: docker-image
 
 cert:
 	@echo "Generate certificate for: $(CN)"
-	openssl req -x509 -newkey rsa:4096 -sha256 -nodes -keyout key.pem -out cert.pem -subj "/CN=$(CN)" -days 3650
+	mkdir -p tls
+	openssl req -x509 -newkey rsa:4096 -sha256 -nodes -keyout tls/server.key -out tls/server.crt -subj "/CN=$(CN)" -days 3650
