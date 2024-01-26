@@ -3,11 +3,12 @@ all: dev
 dev:
 	go build main.go
 
-docker-image:
+image:
+	go mod tidy
 	docker build -t azssi/my-echo-go .
 
 
-docker-push: docker-image
+push-image: image
 	docker push azssi/my-echo-go
 
 cert:
