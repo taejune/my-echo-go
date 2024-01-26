@@ -1,23 +1,24 @@
 package main
 
 import (
-	"github.com/taejune/echo-server-go/pkg/base"
-	"github.com/taejune/echo-server-go/pkg/server"
+	"github.com/taejune/echo-server-go/pkg/handler"
+	"github.com/taejune/echo-server-go/pkg/middleware"
 	"log"
 	"net/http"
 	"os"
 )
 
 func main() {
-	base.InitByEnv()
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
+	handler.InitOption()
+	middleware.InitOption()
+
 	mux := http.NewServeMux()
-	mux.Handle("/", server.LoggingMiddleware(http.HandlerFunc(server.Echo)))
+	mux.Handle("/", middleware.LoggingMiddleware(http.HandlerFunc(handler.Echo)))
 
 	certPath, isCertExist := os.LookupEnv("CERT_PATH")
 	if certPath == "" {
